@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -35,6 +35,8 @@ class PartOfSpeech(Base):
 
 class WordDetail(Base):
     __tablename__ = "words_details"
+    __table_args__ = (
+        UniqueConstraint('word_id', 'part_of_speech_id', 'origin_id', 'meaning', name='_word_detail_uniqueness'),)
 
     word_detail_id = Column(Integer, primary_key=True, index=True)
     word_id = Column(Integer, ForeignKey("words.word_id"))
