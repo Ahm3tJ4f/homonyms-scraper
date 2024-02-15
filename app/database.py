@@ -1,13 +1,11 @@
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import psycopg2
-from psycopg2.extras import RealDictCursor
+
 
 from app.config import settings
 
 load_dotenv()
-
 DB_USER = settings.DB_USER
 DB_PASSWORD = settings.DB_PASSWORD
 DB_HOST = settings.DB_HOST
