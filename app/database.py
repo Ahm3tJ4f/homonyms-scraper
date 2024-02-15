@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 from app.config import settings
 
