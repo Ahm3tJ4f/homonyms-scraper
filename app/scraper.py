@@ -1,10 +1,10 @@
-# scraper.py
-
 import requests
 from bs4 import BeautifulSoup
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 BASE_URL = 'https://obastan.com'
+session = requests.Session()
 
 
 def remove_em_tags(text):
@@ -31,9 +31,9 @@ def clean_meaning(meaning):
 
 
 def scrape_word_details(href_link):
-    """Scrape the details of a word from its individual page."""
+    """Scrape the details of a word from its individual page using the session."""
     full_url = f'{BASE_URL}{href_link}'
-    response = requests.get(full_url)
+    response = session.get(full_url)
     soup = BeautifulSoup(response.content, 'html.parser')
     details = []
     for p in soup.find('div', itemprop='articleBody').find_all('p', recursive=False):
@@ -54,7 +54,7 @@ def scrape_word_details(href_link):
 def scrape_main_list(page_number):
     """Scrape the main list of words from the given page number."""
     page_url = f'{BASE_URL}/azerbaycan-dilinin-omonimler-lugeti/?l=az&p={page_number}'
-    response = requests.get(page_url)
+    response = session.get(page_url)
     soup = BeautifulSoup(response.content, 'html.parser')
     words = [{'word': li.find('h3', class_='wli-title').text.strip(),
               'link': li.find('a', class_='wli-link')['href'].strip()}
@@ -62,22 +62,34 @@ def scrape_main_list(page_number):
     return words
 
 
-def main_scrape():
+def scrape_details_concurrently(word_infos):
+    """Function to scrape details in parallel."""
     all_details = []
-    for page in range(1, 17):
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_word_info = {executor.submit(scrape_word_details, word_info['link']): word_info for word_info in
+                               word_infos}
+        for future in as_completed(future_to_word_info):
+            details = future.result()
+            for detail in details:
+                detail['word'] = future_to_word_info[future]['word']  # Associate word with its details
+                all_details.append(detail)
+    return all_details
+
+
+def main_scrape():
+    all_words_info = []
+    for page in range(1, 17):  # Adjust the range based on the actual number of pages
         print(f'Scraping page {page}...')
         words_list = scrape_main_list(page)
         if not words_list:
             print(f"No words found on page {page}. Stopping scrape.")
             break
-        for word_info in words_list:
-            details = scrape_word_details(word_info['link'])
-            for detail in details:
-                detail['word'] = word_info['word']  # Assign word here to ensure it's correctly associated
-                all_details.append(detail)
-    # Here you would insert all_details into the database instead of creating a DataFrame
-    print("Scraping done. Total words details scraped:", len(all_details))
-    return all_details
+        all_words_info.extend(words_list)
+
+    # Parallelize scraping details for all words
+    data = scrape_details_concurrently(all_words_info)
+    print(f"Scraping done. Total words details scraped: {len(data)}")
+    return data
 
 
 if __name__ == "__main__":
