@@ -1,5 +1,5 @@
-from app.database import Base, engine, session_scope
-from app.models import Word, PartOfSpeech, Origin, WordDetail
+from app.database.database import session_scope
+from app.database.models import Word, PartOfSpeech, Origin, WordDetail
 
 
 def load_existing_data(db_session):

@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
+
+from sqlalchemy import Column, String, Integer, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import relationship
-from app.database import Base
+
+from app.database.database import Base
 
 
 class Word(Base):

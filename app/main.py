@@ -1,4 +1,4 @@
-from app.database_operations import insert_data_to_database
+from app.database.database_operations import insert_data_to_database
 from app.scraper import main_scrape
 
 

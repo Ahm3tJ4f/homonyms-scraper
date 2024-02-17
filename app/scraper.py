@@ -31,7 +31,7 @@ def extract_meaning_and_usage(clean_text):
 
 def clean_meaning(meaning):
     """Clean the meaning text by removing unwanted characters."""
-    return re.sub(r"\[\s*\]", "", meaning).strip()
+    return re.sub(r"\[\s*]", "", meaning).strip()
 
 
 def scrape_word_details(href_link):
